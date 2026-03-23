@@ -4,7 +4,7 @@
  */
 
 export interface ChatMessage {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
 }
 
@@ -18,20 +18,20 @@ export interface GenerateTestsOptions {
   model?: string;
 }
 
-const DEEPWIKI_BASE = process.env.DEEPWIKI_URL || 'http://localhost:3000';
-const DEEPWIKI_API_KEY = process.env.DEEPWIKI_API_KEY || '';
-const DEEPWIKI_TIMEOUT = parseInt(process.env.DEEPWIKI_TIMEOUT || '120000', 10);
+const DEEPWIKI_BASE = process.env.DEEPWIKI_URL || "http://localhost:3000";
+const DEEPWIKI_API_KEY = process.env.DEEPWIKI_API_KEY || "";
+const DEEPWIKI_TIMEOUT = parseInt(process.env.DEEPWIKI_TIMEOUT || "120000", 10);
 
 export async function generateTestsViaDeepWiki(
-  options: GenerateTestsOptions
+  options: GenerateTestsOptions,
 ): Promise<string> {
   const {
     owner,
     repo,
     filePath,
     fileContent,
-    language = 'en',
-    provider = 'google',
+    language = "en",
+    provider = "google",
     model = undefined,
   } = options;
 
@@ -67,9 +67,10 @@ IMPORTANT:
 `;
 
   const requestBody: Record<string, unknown> = {
+    repo_url: `https://github.com/${owner}/${repo}`,
     messages: [
       {
-        role: 'user',
+        role: "user",
         content: testGenerationPrompt,
       },
     ] as ChatMessage[],
@@ -82,10 +83,12 @@ IMPORTANT:
 
   try {
     const response = await fetch(`${DEEPWIKI_BASE}/api/chat/stream`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        ...(DEEPWIKI_API_KEY && { Authorization: `Bearer ${DEEPWIKI_API_KEY}` }),
+        "Content-Type": "application/json",
+        ...(DEEPWIKI_API_KEY && {
+          Authorization: `Bearer ${DEEPWIKI_API_KEY}`,
+        }),
       },
       body: JSON.stringify(requestBody),
       signal: AbortSignal.timeout(DEEPWIKI_TIMEOUT),
@@ -93,12 +96,12 @@ IMPORTANT:
 
     if (!response.ok) {
       throw new Error(
-        `DeepWiki API error: ${response.status} ${response.statusText}`
+        `DeepWiki API error: ${response.status} ${response.statusText}`,
       );
     }
 
     // Handle streaming response
-    let fullResponse = '';
+    let fullResponse = "";
 
     if (response.body) {
       const reader = response.body.getReader();
@@ -118,9 +121,9 @@ IMPORTANT:
 
     return fullResponse;
   } catch (error) {
-    if (error instanceof TypeError && error.message.includes('fetch')) {
+    if (error instanceof TypeError && error.message.includes("fetch")) {
       throw new Error(
-        `Cannot reach DeepWiki at ${DEEPWIKI_BASE}. Make sure it's running.`
+        `Cannot reach DeepWiki at ${DEEPWIKI_BASE}. Make sure it's running.`,
       );
     }
     throw error;
@@ -128,15 +131,35 @@ IMPORTANT:
 }
 
 export async function checkDeepWikiHealth(): Promise<boolean> {
-  try {
-    const response = await fetch(`${DEEPWIKI_BASE}/health`, {
-      method: 'GET',
-      signal: AbortSignal.timeout(5000),
-    });
-    return response.ok;
-  } catch {
-    return false;
+  const probes: Array<{ path: string; method: "GET" | "OPTIONS" }> = [
+    { path: "/health", method: "GET" },
+    // DeepWiki UI deployments may not expose /health but do expose the chat API.
+    { path: "/api/chat/stream", method: "OPTIONS" },
+    { path: "/api/chat/stream", method: "GET" },
+  ];
+
+  for (const probe of probes) {
+    try {
+      const response = await fetch(`${DEEPWIKI_BASE}${probe.path}`, {
+        method: probe.method,
+        signal: AbortSignal.timeout(5000),
+      });
+
+      // A non-404 response means the server is reachable and route likely exists.
+      if (
+        response.ok ||
+        (response.status >= 400 &&
+          response.status < 500 &&
+          response.status !== 404)
+      ) {
+        return true;
+      }
+    } catch {
+      // Continue probing other endpoints before deciding it's down.
+    }
   }
+
+  return false;
 }
 
 export function getDeepWikiBaseUrl(): string {

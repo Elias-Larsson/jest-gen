@@ -9,11 +9,11 @@ AI-powered Jest test generator using **DeepWiki**. Automatically generate compre
 📝 **Good Test Quality** — Edge cases, error handling, realistic tests  
 ⚡ **CLI-First** — Terminal-based workflow, zero web UI overhead  
 🔌 **Provider Flexible** — Works with Google, OpenAI, Anthropic, and more  
-🌍 **Multilingual** — Supports test comments in multiple languages  
+🌍 **Multilingual** — Supports test comments in multiple languages
 
 ## Prerequisites
 
-- **Node.js** 18+ 
+- **Node.js** 18+
 - **DeepWiki** running locally (see [setup](#setup))
 - A source code repository to test
 
@@ -139,6 +139,7 @@ jest-gen my-org my-app "src/components/**/*.tsx" \
 ```
 
 **What this does:**
+
 - Finds all `.tsx` files in `src/components/`
 - Analyzes them using GPT-4 via OpenAI
 - Generates Jest tests for each component
@@ -191,19 +192,19 @@ Example generated test:
 
 ```typescript
 // __tests__/utils/validateEmail.test.ts
-import { validateEmail } from '../../src/utils/validateEmail';
+import { validateEmail } from "../../src/utils/validateEmail";
 
-describe('validateEmail', () => {
-  it('should return true for valid email addresses', () => {
-    expect(validateEmail('user@example.com')).toBe(true);
+describe("validateEmail", () => {
+  it("should return true for valid email addresses", () => {
+    expect(validateEmail("user@example.com")).toBe(true);
   });
 
-  it('should return false for invalid email format', () => {
-    expect(validateEmail('invalid-email')).toBe(false);
+  it("should return false for invalid email format", () => {
+    expect(validateEmail("invalid-email")).toBe(false);
   });
 
-  it('should handle edge cases like empty strings', () => {
-    expect(validateEmail('')).toBe(false);
+  it("should handle edge cases like empty strings", () => {
+    expect(validateEmail("")).toBe(false);
   });
 });
 ```
@@ -232,11 +233,11 @@ Make sure your `jest.config.js` covers the test files:
 
 ```javascript
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'json'],
-  collectCoverageFrom: ['src/**/*.{ts,tsx}'],
+  preset: "ts-jest",
+  testEnvironment: "node",
+  testMatch: ["**/__tests__/**/*.test.ts", "**/__tests__/**/*.test.tsx"],
+  moduleFileExtensions: ["ts", "tsx", "js", "json"],
+  collectCoverageFrom: ["src/**/*.{ts,tsx}"],
 };
 ```
 
@@ -257,8 +258,8 @@ Ensure your `tsconfig.json` includes Jest types:
 ### "Cannot reach DeepWiki"
 
 ```bash
-# Check if DeepWiki is running
-curl http://localhost:3000/health
+# Check if DeepWiki is running (some deployments don't expose /health)
+curl -I http://localhost:3000/api/chat/stream
 
 # If not running, start it
 cd ../deepwiki-open
@@ -320,27 +321,24 @@ jest-gen AsyncFuncAI deepwiki-open "src/components/*.tsx" # Components
 You can also use jest-gen as a library:
 
 ```typescript
-import {
-  generateTestsViaDeepWiki,
-  checkDeepWikiHealth,
-} from './lib/deepwiki';
-import { extractCodeBlock, generateTestPath } from './lib/parser';
+import { generateTestsViaDeepWiki, checkDeepWikiHealth } from "./lib/deepwiki";
+import { extractCodeBlock, generateTestPath } from "./lib/parser";
 
 // Check health
 const isHealthy = await checkDeepWikiHealth();
 
 // Generate a test
 const response = await generateTestsViaDeepWiki({
-  owner: 'myorg',
-  repo: 'myrepo',
-  filePath: 'src/utils/helper.ts',
-  fileContent: '// source code here',
-  provider: 'google',
+  owner: "myorg",
+  repo: "myrepo",
+  filePath: "src/utils/helper.ts",
+  fileContent: "// source code here",
+  provider: "google",
 });
 
 // Parse result
 const testCode = extractCodeBlock(response);
-const testPath = generateTestPath('src/utils/helper.ts');
+const testPath = generateTestPath("src/utils/helper.ts");
 ```
 
 ## Development
@@ -370,6 +368,7 @@ Contributions welcome! Please open an issue or PR on GitHub.
 ## Support
 
 For issues or questions:
+
 - Check the [Troubleshooting](#troubleshooting) section
 - Open an issue on GitHub
 - Contact the AsyncFuncAI team
