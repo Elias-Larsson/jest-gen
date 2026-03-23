@@ -1,0 +1,33 @@
+{
+  "name": "jest-gen",
+  "version": "0.1.0",
+  "description": "AI-powered Jest test generator using DeepWiki",
+  "type": "module",
+  "bin": {
+    "jest-gen": "./dist/cli.js"
+  },
+  "scripts": {
+    "start": "tsx src/cli.ts",
+    "build": "tsc",
+    "dev": "tsx watch src/cli.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "jest",
+    "testing",
+    "ai",
+    "deepwiki",
+    "test-generation"
+  ],
+  "author": "AsyncFuncAI",
+  "license": "MIT",
+  "dependencies": {
+    "glob": "^11.0.0",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  }
+}
